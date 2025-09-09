@@ -6,7 +6,7 @@ import Link from 'next/link';
 interface CodeWithMetrics {
   id: string;
   code: string;
-  owner: {
+  owner?: {
     name: string;
     type: string;
   };
@@ -212,8 +212,8 @@ export default function CodesPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <div>
-                        <div className="font-medium">{code.owner.name}</div>
-                        <div className="text-xs text-gray-400">{code.owner.type}</div>
+                        <div className="font-medium">{code.owner?.name || 'Unknown'}</div>
+                        <div className="text-xs text-gray-400">{code.owner?.type || 'Unknown'}</div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

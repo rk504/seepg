@@ -233,8 +233,6 @@ curl -X POST http://localhost:3000/api/metrics -d '{"action":"run_anomaly_detect
 # Reset database and reseed
 npm run db:reset
 
-# Open Prisma Studio
-npm run db:studio
 
 # Generate new migration
 npm run db:migrate

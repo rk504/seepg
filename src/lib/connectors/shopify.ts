@@ -52,7 +52,7 @@ export async function fetchShopifyOrders(params: {
   const searchParams = new URLSearchParams();
   
   Object.entries(params).forEach(([key, value]) => {
-    if (value) searchParams.append(key, value);
+    if (value) searchParams.append(key, String(value));
   });
 
   const url = `${baseUrl}/orders.json?${searchParams.toString()}`;
@@ -88,7 +88,7 @@ export async function fetchShopifyCustomers(params: {
   const searchParams = new URLSearchParams();
   
   Object.entries(params).forEach(([key, value]) => {
-    if (value) searchParams.append(key, value);
+    if (value) searchParams.append(key, String(value));
   });
 
   const url = `${baseUrl}/customers.json?${searchParams.toString()}`;
@@ -124,7 +124,7 @@ export async function fetchShopifyDiscountCodes(params: {
   const searchParams = new URLSearchParams();
   
   Object.entries(params).forEach(([key, value]) => {
-    if (value) searchParams.append(key, value);
+    if (value) searchParams.append(key, String(value));
   });
 
   const url = `${baseUrl}/price_rules.json?${searchParams.toString()}`;

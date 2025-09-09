@@ -61,7 +61,7 @@ export function calculateLeakage(totalUses: number, newCustomerUses: number): nu
 export function isNewCustomer(orderDate: Date, firstOrderDate: Date): boolean {
   const timeDiff = orderDate.getTime() - firstOrderDate.getTime();
   const daysDiff = timeDiff / (1000 * 3600 * 24);
-  return daysDiff <= 1; // Within 1 day of first order
+  return daysDiff <= 30; // Within 30 days of first order (more realistic for new customer acquisition)
 }
 
 /**
@@ -140,7 +140,7 @@ export async function calculateOwnerMetrics(ownerId: string, startDate?: Date, e
   const ownerCodes = allCodes.filter(code => code.owner_id === ownerId);
 
   // Get all redemptions for these codes
-  let allRedemptions = [];
+  let allRedemptions: any[] = [];
   for (const code of ownerCodes) {
     const redemptions = await db.codeRedemptions.findMany({ codeId: code.id });
     allRedemptions = allRedemptions.concat(redemptions);

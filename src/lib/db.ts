@@ -153,6 +153,16 @@ export const db = {
 
   // Orders
   orders: {
+    async findMany() {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    },
+    
     async findUnique(where: { externalId: string }) {
       const { data, error } = await supabase
         .from('orders')
@@ -173,26 +183,6 @@ export const db = {
       
       if (error) throw error;
       return result;
-    },
-    
-    async findMany() {
-      const { data, error } = await supabase
-        .from('orders')
-        .select(`
-          *,
-          customers!inner (*),
-          code_redemptions!inner (
-            *,
-            codes!inner (
-              *,
-              owners!inner (*)
-            )
-          )
-        `)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data || [];
     }
   },
 

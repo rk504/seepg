@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { db } from '@/lib/db';
 import { GA4EventSchema } from '@/lib/metrics';
 import { z } from 'zod';
 
@@ -36,11 +36,8 @@ export async function POST(request: NextRequest) {
       const currency = currencyParam?.value?.string_value || 'USD';
 
       // Check for idempotency
-      const existingOrder = await prisma.order.findFirst({
-        where: { 
-          externalId: `ga4_${webhookData.client_id}_${event.event_timestamp}`,
-          coupon: couponCode
-        }
+      const existingOrder = await db.orders.findUnique({
+        externalId: `ga4_${webhookData.client_id}_${event.event_timestamp}`
       });
 
       if (existingOrder) {
@@ -48,35 +45,31 @@ export async function POST(request: NextRequest) {
       }
 
       // Find or create customer using pseudo_id
-      let customer = await prisma.customer.findFirst({
-        where: { 
-          email: `${webhookData.client_id}@ga4.anonymous` // Anonymous GA4 user
-        }
+      let customer = await db.customers.findUnique({
+        email: `${webhookData.client_id}@ga4.anonymous` // Anonymous GA4 user
       });
 
       if (!customer) {
-        customer = await prisma.customer.create({
-          data: {
-            email: `${webhookData.client_id}@ga4.anonymous`,
-            firstName: 'GA4',
-            lastName: 'User',
-            firstOrderAt: event.event_timestamp,
-            lifetimeValue: orderValue,
-          }
+        customer = await db.customers.create({
+          email: `${webhookData.client_id}@ga4.anonymous`,
+          first_name: 'GA4',
+          last_name: 'User',
+          first_order_at: event.event_timestamp,
+          lifetime_value: orderValue,
         });
       } else {
         // Update lifetime value
-        const newLTV = Number(customer.lifetimeValue) + orderValue;
-        await prisma.customer.update({
-          where: { id: customer.id },
-          data: { lifetimeValue: newLTV }
+        const newLTV = Number(customer.lifetime_value) + orderValue;
+        await db.customers.update({
+          id: customer.id
+        }, {
+          lifetime_value: newLTV
         });
       }
 
       // Find promo code
-      const promoCode = await prisma.code.findUnique({
-        where: { code: couponCode },
-        include: { owner: true }
+      const promoCode = await db.codes.findUnique({
+        code: couponCode
       });
 
       // Estimate discount value (GA4 doesn't provide this directly)
@@ -85,26 +78,22 @@ export async function POST(request: NextRequest) {
       const finalTotal = orderValue - estimatedDiscountValue;
 
       // Create order
-      const order = await prisma.order.create({
-        data: {
-          externalId: `ga4_${webhookData.client_id}_${event.event_timestamp}`,
-          customerId: customer.id,
-          total: finalTotal,
-          discountValue: estimatedDiscountValue,
-          coupon: couponCode,
-          channel: 'GA4',
-          ownerId: promoCode?.ownerId || null,
-          createdAt: event.event_timestamp,
-        }
+      const order = await db.orders.create({
+        external_id: `ga4_${webhookData.client_id}_${event.event_timestamp}`,
+        customer_id: customer.id,
+        total: finalTotal,
+        discount_value: estimatedDiscountValue,
+        coupon: couponCode,
+        channel: 'GA4',
+        owner_id: promoCode?.owner_id || null,
+        created_at: event.event_timestamp,
       });
 
       // Create redemption record if promo code was found
       if (promoCode) {
-        await prisma.codeRedemption.create({
-          data: {
-            codeId: promoCode.id,
-            orderId: order.id,
-          }
+        await db.codeRedemptions.create({
+          code_id: promoCode.id,
+          order_id: order.id,
         });
       }
     }

@@ -1,6 +1,6 @@
 import { db } from './db';
 
-// Define types locally since we're not using Prisma
+// Define types locally 
 export type AnomalyType = 'SPIKE_REDEMPTION' | 'LEAKAGE_DETECTED' | 'LOW_PVI' | 'UNUSUAL_PATTERN';
 export type Severity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
