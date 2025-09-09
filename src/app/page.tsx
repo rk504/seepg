@@ -29,15 +29,8 @@ interface DashboardKPIs {
 }
 
 export default function HomePage() {
-  const [kpis, setKpis] = useState<DashboardKPIs | null>({
-    totalPromoSpend: 65607.35,
-    incrementalRevenue: 1062.22,
-    avgPvi: 0.016,
-    leakage: 99.6,
-    totalRedemptions: 1000,
-    newCustomerRedemptions: 4,
-  });
-  const [loading, setLoading] = useState(false);
+  const [kpis, setKpis] = useState<DashboardKPIs | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchKPIs();
@@ -53,14 +46,7 @@ export default function HomePage() {
       setKpis(data);
     } catch (error) {
       console.error('Error fetching KPIs:', error);
-      setKpis({
-        totalPromoSpend: 0,
-        incrementalRevenue: 0,
-        avgPvi: 0,
-        leakage: 0,
-        totalRedemptions: 0,
-        newCustomerRedemptions: 0,
-      });
+      setKpis(null);
     } finally {
       setLoading(false);
     }
@@ -72,6 +58,24 @@ export default function HomePage() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent mx-auto mb-4"></div>
           <p className="text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!kpis) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <AlertTriangle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Unable to load data</h2>
+          <p className="text-gray-600 mb-4">There was an error fetching dashboard data.</p>
+          <button
+            onClick={fetchKPIs}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
         </div>
       </div>
     );
@@ -101,7 +105,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <MetricCard
               title="Total Promo Spend"
-              value={kpis?.totalPromoSpend || 0}
+              value={kpis?.totalPromoSpend ?? 0}
               change={12.5}
               changeLabel="vs last month"
               icon={DollarSign}
@@ -110,7 +114,7 @@ export default function HomePage() {
             />
             <MetricCard
               title="Incremental Revenue"
-              value={kpis?.incrementalRevenue || 0}
+              value={kpis?.incrementalRevenue ?? 0}
               change={8.2}
               changeLabel="vs last month"
               icon={TrendingUp}
@@ -119,7 +123,7 @@ export default function HomePage() {
             />
             <MetricCard
               title="Average PVI"
-              value={kpis?.avgPvi || 0}
+              value={kpis?.avgPvi ?? 0}
               change={-2.1}
               changeLabel="vs last month"
               icon={BarChart3}
@@ -128,7 +132,7 @@ export default function HomePage() {
             />
             <MetricCard
               title="Leakage Rate"
-              value={kpis?.leakage || 0}
+              value={kpis?.leakage ?? 0}
               change={-5.3}
               changeLabel="vs last month"
               icon={AlertTriangle}

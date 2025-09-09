@@ -110,7 +110,7 @@ export default function CodesPage() {
                 Export CSV
               </button>
               <Link
-                href="/dashboard"
+                href="/"
                 className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 Back to Dashboard
